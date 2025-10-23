@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .form-container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        .form-section h5 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-book"></i> {{ title }}</h2>
+                <a href="{% url 'menu_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.name.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.category.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.description.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Precio y Disponibilidad -->
+                <div class="form-section">
+                    <h5><i class="bi bi-cash-coin"></i> Precio y Disponibilidad</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ form.price.label }}</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.price.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ form.preparation_time.label }}</label>
+                            {{ form.preparation_time }}
+                            {% if form.preparation_time.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.preparation_time.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        {{ form.is_available }}
+                        <label class="form-check-label" for="{{ form.is_available.id_for_label }}">
+                            {{ form.is_available.label }}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Características -->
+                <div class="form-section">
+                    <h5><i class="bi bi-star"></i> Características</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.spicy_level.label }}</label>
+                        {{ form.spicy_level }}
+                        {% if form.spicy_level.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.spicy_level.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check">
+                        {{ form.is_vegetarian }}
+                        <label class="form-check-label" for="{{ form.is_vegetarian.id_for_label }}">
+                            {{ form.is_vegetarian.label }}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-check-circle"></i> {{ button_text }}
+                    </button>
+                    <a href="{% url 'menu_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -25,4 +25,15 @@ class MenuItemAdmin(admin.ModelAdmin):
             'fields': ('name', 'category', 'description')
         }),
         ('Precio y Disponibilidad', {
-            'fields': ('price
+            'fields': ('price', 'is_available')
+        }),
+        ('Características', {
+            'fields': ('is_vegetarian', 'spicy_level', 'preparation_time')
+        }),
+    )
+    
+    # Opcional: agregar filtros de fecha
+    date_hierarchy = 'created_at'
+    
+    # Opcional: mostrar campos de solo lectura
+    readonly_fields = ['created_at', 'updated_at']
