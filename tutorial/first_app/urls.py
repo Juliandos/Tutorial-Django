@@ -7,4 +7,6 @@ urlpatterns = [
     path('path/', views.req_path, name='req_path'),
     path('params/<str:param1>/<str:param2>/', views.params_example, name='params_example'),
     re_path(r'^articles/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<slug>[-\w]+)/$', views.article_detail, name='article_detail'),
+    path('restaurant-form/', views.restaurant_form_view, name='restaurant_form'),
+    path('restaurant-form-simple/', views.restaurant_form_simple_view, name='restaurant_form_simple'),
 ]
