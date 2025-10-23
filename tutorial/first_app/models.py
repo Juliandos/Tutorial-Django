@@ -5,6 +5,7 @@ class Menu(models.Model):
     name = models.CharField(max_length=100)
     cuisine = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=6, decimal_places=2)
+    year = models.IntegerField()
 
     def __str__(self):
         return self.name
