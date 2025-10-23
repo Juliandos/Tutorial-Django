@@ -18,3 +18,6 @@ def req_path(request):
 
 def params_example(request, param1, param2):
     return HttpResponse(f"Parameter 1: {param1}, Parameter 2: {param2}")
+
+def article_detail(request, year, month, slug):
+    return HttpResponse(f"Artículo: {slug} — Fecha: {month}/{year}")
