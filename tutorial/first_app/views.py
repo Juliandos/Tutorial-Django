@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .forms import RestaurantRegistrationForm
-import json
+from django.contrib import messages
+from .models import Category, MenuItem
+from .forms import CategoryForm, MenuItemForm
 
 def home(request):
     return HttpResponse("Hello, welcome to the first Django app!")
@@ -22,72 +23,157 @@ def params_example(request, param1, param2):
 def article_detail(request, year, month, slug):
     return HttpResponse(f"Artículo: {slug} — Fecha: {month}/{year}")
 
-def restaurant_form_view(request):
-    """
-    Vista que maneja el formulario de registro de restaurante
-    
-    Flujo:
-    - GET: Muestra el formulario vacío
-    - POST: Procesa los datos enviados
-    """
-    
-    if request.method == 'POST':
-        # Crear instancia del formulario con los datos enviados
-        form = RestaurantRegistrationForm(request.POST, request.FILES)
-        
-        # Validar el formulario
-        if form.is_valid():
-            # Los datos validados están en form.cleaned_data
-            data = form.cleaned_data
-            
-            # Aquí puedes procesar los datos:
-            # - Guardar en base de datos
-            # - Enviar email
-            # - Realizar cálculos
-            # etc.
-            
-            # Ejemplo: Guardar la información
-            restaurant_info = {
-                'nombre': data['restaurant_name'],
-                'email': data['email'],
-                'año': data['year_established'],
-                'precio_promedio': str(data['average_price']),
-                'rating': data['rating'],
-                'país': data['country'],
-                'descripción': data['description'],
-                'delivery': data['has_delivery'],
-                'servicios': data['services'],
-                'reservación': data['reservation_required'],
-                'fecha_apertura': str(data['opening_date']),
-                'hora_apertura': str(data['opening_time']),
-                'website': data['website'],
-                'categoría': str(data['menu_category']),
-            }
-            
-            # Manejar archivo de imagen
-            if data['logo']:
-                # En producción, guardarías el archivo
-                restaurant_info['logo'] = data['logo'].name
-            
-            # Mostrar página de éxito
-            return render(request, 'first_app/success.html', {
-                'restaurant_info': restaurant_info
-            })
-        
-        else:
-            # El formulario tiene errores, se volverá a mostrar con los errores
-            pass
-    
-    else:
-        # GET: Mostrar formulario vacío
-        form = RestaurantRegistrationForm()
-    
-    # Renderizar el template con el formulario
-    return render(request, 'first_app/restaurant_form.html', {
-        'form': form
+# ============= VISTAS DE CATEGORÍAS =============
+
+def category_list(request):
+    """Lista todas las categorías"""
+    categories = Category.objects.all()
+    return render(request, 'first_app/category_list.html', {
+        'categories': categories
     })
 
-def restaurant_form_simple_view(request):
+def category_create(request):
+    """Crear una nueva categoría"""
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f'Categoría "{category.name}" creada exitosamente.')
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+    
+    return render(request, 'first_app/category_form.html', {
+        'form': form,
+        'title': 'Crear Categoría',
+        'button_text': 'Crear'
+    })
+
+def category_update(request, pk):
+    """Editar una categoría existente"""
+    category = get_object_or_404(Category, pk=pk)
+    
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Categoría "{category.name}" actualizada exitosamente.')
+            return redirect('category_list')
+    else:
+        form = CategoryForm(instance=category)
+    
+    return render(request, 'first_app/category_form.html', {
+        'form': form,
+        'title': f'Editar Categoría: {category.name}',
+        'button_text': 'Actualizar'
+    })
+
+def category_delete(request, pk):
+    """Eliminar una categoría"""
+    category = get_object_or_404(Category, pk=pk)
+    
+    if request.method == 'POST':
+        category_name = category.name
+        category.delete()
+        messages.success(request, f'Categoría "{category_name}" eliminada exitosamente.')
+        return redirect('category_list')
+    
+    return render(request, 'first_app/category_confirm_delete.html', {
+        'category': category
+    })
+
+# ============= VISTAS DE PLATOS DEL MENÚ =============
+
+def menu_list(request):
+    """Lista todos los platos del menú"""
+    menu_items = MenuItem.objects.select_related('category').all()
+    
+    # Filtros opcionales
+    category_id = request.GET.get('category')
+    if category_id:
+        menu_items = menu_items.filter(category_id=category_id)
+    
+    available_only = request.GET.get('available')
+    if available_only == '1':
+        menu_items = menu_items.filter(is_available=True)
+    
+    categories = Category.objects.all()
+    
+    return render(request, 'first_app/menu_list.html', {
+        'menu_items': menu_items,
+        'categories': categories
+    })
+
+def menu_create(request):
+    """Crear un nuevo plato del menú"""
+    if request.method == 'POST':
+        form = MenuItemForm(request.POST)
+        if form.is_valid():
+            menu_item = form.save()
+            messages.success(request, f'Plato "{menu_item.name}" creado exitosamente.')
+            return redirect('menu_list')
+    else:
+        form = MenuItemForm()
+    
+    return render(request, 'first_app/menu_form.html', {
+        'form': form,
+        'title': 'Crear Plato',
+        'button_text': 'Crear'
+    })
+
+def menu_update(request, pk):
+    """Editar un plato del menú existente"""
+    menu_item = get_object_or_404(MenuItem, pk=pk)
+    
+    if request.method == 'POST':
+        form = MenuItemForm(request.POST, instance=menu_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Plato "{menu_item.name}" actualizado exitosamente.')
+            return redirect('menu_list')
+    else:
+        form = MenuItemForm(instance=menu_item)
+    
+    return render(request, 'first_app/menu_form.html', {
+        'form': form,
+        'title': f'Editar Plato: {menu_item.name}',
+        'button_text': 'Actualizar'
+    })
+
+def menu_delete(request, pk):
+    """Eliminar un plato del menú"""
+    menu_item = get_object_or_404(MenuItem, pk=pk)
+    
+    if request.method == 'POST':
+        menu_item_name = menu_item.name
+        menu_item.delete()
+        messages.success(request, f'Plato "{menu_item_name}" eliminado exitosamente.')
+        return redirect('menu_list')
+    
+    return render(request, 'first_app/menu_confirm_delete.html', {
+        'menu_item': menu_item
+    })
+
+def menu_detail(request, pk):
+    """Ver detalles de un plato del menú"""
+    menu_item = get_object_or_404(MenuItem, pk=pk)
+    return render(request, 'first_app/menu_detail.html', {
+        'menu_item': menu_item
+    })
+
+# ============= VISTA PRINCIPAL =============
+
+def home(request):
+    """Página de inicio con estadísticas"""
+    categories_count = Category.objects.count()
+    menu_items_count = MenuItem.objects.count()
+    available_items = MenuItem.objects.filter(is_available=True).count()
+    
+    return render(request, 'first_app/home.html', {
+        'categories_count': categories_count,
+        'menu_items_count': menu_items_count,
+        'available_items': available_items,
+    })
     """
     Vista alternativa que muestra el formulario sin template
     (solo para demostración, no es la mejor práctica)
